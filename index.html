@@ -103,7 +103,7 @@ ol b{color:var(--ink)}
 
 <section>
   <h2><span class="n">3</span>When this happens → do this</h2>
-  <p class="sub">Pick a trigger (a controller button or a hub sensor) and what should happen: light up the hub’s 5×5 display, blink the light, beep, rumble the controller or stop motors.</p>
+  <p class="sub">Pick a trigger (a controller button, or a sensor you added in step 1: set a port to Color, Distance or Force) and what should happen: light up the hub’s 5×5 display, blink the light, beep, rumble the controller or stop motors.</p>
   <div id="rrows"></div>
   <div class="bar"><button class="btn-main" id="radd">+ Add rule</button></div>
 </section>
@@ -192,7 +192,7 @@ function renderRules(){
  const ms=pn(),sps=sp();
  $("rrows").innerHTML=S.rules.length?S.rules.map((r,i)=>{
   const sens=isS(r),p=sens?r.src.slice(1):"",t=sens?st(p):"";
-  const src=`<optgroup label="Controller">${opt(BTN,r.src)}</optgroup>`+(sps.length?`<optgroup label="Hub sensors">${opt(sps.map(q=>["@"+q,SN[st(q)]+" · port "+q]),r.src)}</optgroup>`:"");
+  const src=`<optgroup label="Controller">${opt(BTN,r.src)}</optgroup>`+(sps.length?`<optgroup label="Hub sensors">${opt(sps.map(q=>["@"+q,SN[st(q)]+" · port "+q]),r.src)}</optgroup>`:`<optgroup label="Hub sensors"><option disabled>First set a port to a sensor in step 1</option></optgroup>`);
   let when=fld("Trigger",`<select data-f="src">${src}</select>`);
   if(!sens)when+=fld("How",`<select data-f="mode">${opt([["hold","While held down"],["toggle","Press to switch on / off"]],r.mode)}</select>`);
   else{const conds=t=="dist"?[["near","Is closer than"]]:t=="force"?[["press","Is pressed with at least"]]:[["color","Sees the color"],["dark","Reflection is below"],["bright","Reflection is above"]];
