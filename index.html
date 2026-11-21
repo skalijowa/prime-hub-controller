@@ -58,7 +58,11 @@ svg{width:100%;max-width:440px;height:auto;justify-self:center}
 .mx{display:grid;grid-template-columns:repeat(5,38px);gap:5px;background:#1c1d23;padding:8px;border-radius:10px;width:max-content;max-width:100%}
 .pxc{width:38px;height:38px;border-radius:8px;border:0;background:var(--off);padding:0}
 .pxc.on{background:var(--yel);box-shadow:0 0 8px rgba(255,213,0,.7)}
-svg.mini{max-width:230px;justify-self:start}
+details summary{cursor:pointer;font-weight:800;font-size:1.05rem}
+textarea{width:100%;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;background:var(--code);color:var(--codeink);border:2px solid var(--line);border-radius:12px;padding:12px;resize:vertical;margin:10px 0 4px}
+svg.mini{max-width:280px;justify-self:start}
+svg.mini [data-k]{cursor:pointer}
+svg.mini .p:hover{stroke:var(--blue);stroke-width:4}
 .sensbadge{display:flex;align-items:center;gap:10px;background:#26272d;color:#fff;border-radius:10px;padding:8px 12px;font-weight:700;justify-self:start}
 .sensbadge b{color:var(--yel);font-size:1.3rem}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
@@ -67,6 +71,7 @@ svg .p{fill:var(--line);stroke:var(--mute);stroke-width:2;transition:.15s}
 svg .body{fill:var(--card);stroke:var(--mute);stroke-width:3}
 svg text{font:800 11px sans-serif;fill:var(--mute);pointer-events:none}
 svg .on{stroke:var(--ink);stroke-width:3}
+svg .on + text{fill:#fff}
 svg [data-k=A].on{fill:#5dc21e}svg [data-k=B].on{fill:#ff5a5a}svg [data-k=X].on{fill:#4a90ff}svg [data-k=Y].on{fill:var(--yel)}
 svg .on:not([data-k=A]):not([data-k=B]):not([data-k=X]):not([data-k=Y]){fill:var(--grn)}
 pre{background:var(--code);color:var(--codeink);padding:14px;border-radius:12px;overflow-x:auto;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;margin:0;max-height:520px}
@@ -84,6 +89,15 @@ ol b{color:var(--ink)}
 </header>
 <main>
 <section>
+  <details id="imp">
+    <summary>📥 Already have a program? Paste it here to keep editing it</summary>
+    <p class="sub" style="margin-top:8px">Paste your current Pybricks code and press Load. The app fills in the ports, controller mappings and rules below. Code made by this app is understood best. Anything hand-written (own functions, extra loops) is not kept, because the app writes the code again from the settings. Loading replaces what is set now.</p>
+    <textarea id="imp-t" rows="8" placeholder="Paste your code here…" spellcheck="false" aria-label="Pybricks code to load"></textarea>
+    <div class="bar"><button class="btn-main" id="imp-go">Load into the app</button><span id="imp-msg" class="sub" role="status" style="align-self:center;margin:0"></span></div>
+  </details>
+</section>
+
+<section>
   <h2><span class="n">1</span>Your SPIKE Prime hub</h2>
   <p class="sub">Choose what is plugged into each port. Use the direction button to flip a motor that is mounted the other way round.</p>
   <div class="hub"><div class="studs"><i></i><i></i><i></i><i></i><i></i></div><div class="ports" id="ports"></div></div>
@@ -91,7 +105,7 @@ ol b{color:var(--ink)}
 
 <section>
   <h2><span class="n">2</span>Controller → motors</h2>
-  <p class="sub">Each card connects one control on the Xbox controller to one motor. Several cards can drive the same motor (e.g. right trigger = forward, left trigger = backward).</p>
+  <p class="sub">Each card connects one control on the Xbox controller to one motor. Several cards can drive the same motor (e.g. right trigger = forward, left trigger = backward). Car drives the wrong way? Tick <b>Reverse</b> on that card, flip the motor with its direction button in step 1, or use “Invert up/down on both sticks” in step 4.</p>
   <div class="pad">
     <div><div id="rows"></div>
       <div class="bar">
@@ -118,6 +132,7 @@ ol b{color:var(--ink)}
     <label class="f">Joystick dead zone (%)<input type="number" id="dz" min="0" max="50" value="10"></label>
     <label class="f">When idle, motor will<select id="idle"><option value="brake">Brake (stop quickly)</option><option value="stop">Coast (roll freely)</option><option value="hold">Hold position</option></select></label>
     <label class="f">Controller name (optional)<input type="text" id="cname" placeholder="any controller"></label>
+    <label class="f chk"><input type="checkbox" id="flip"><span>Invert up/down on both sticks</span></label>
   </div>
 </section>
 
@@ -153,7 +168,7 @@ const hintFor=r=>{if(r.act!="stopmotor"&&r.act!="stopall")return HINT[r.act];con
 const P=(...r)=>r.join("");
 const PRE={heart:P("01010","11111","11111","01110","00100"),smile:P("01010","00000","00000","10001","01110"),up:P("00100","01110","10101","00100","00100"),down:P("00100","00100","10101","01110","00100"),left:P("00100","01000","11111","01000","00100"),right:P("00100","00010","11111","00010","00100"),check:P("00000","00001","00010","10100","01000"),cross:P("10001","01010","00100","01010","10001"),all:"1".repeat(25),clear:"0".repeat(25)};
 const CHIPS=[["heart","❤"],["smile","☺"],["up","↑"],["down","↓"],["left","←"],["right","→"],["check","✓"],["cross","✕"],["all","■"],["clear","Clear"]];
-const S={ports:{},maps:[],rules:[],max:800,dz:10,idle:"brake",name:""};
+const S={ports:{},maps:[],rules:[],flip:false,max:800,dz:10,idle:"brake",name:""};
 PORTS.forEach((p,i)=>S.ports[p]={t:i<2?"motor":"none",ccw:i==1});
 const $=id=>document.getElementById(id);
 const kind=k=>INPUTS.find(i=>i[0]==k)[2];
@@ -162,6 +177,9 @@ const st=p=>S.ports[p]?S.ports[p].t:"";
 const pn=()=>PORTS.filter(isM);
 const sp=()=>PORTS.filter(p=>["color","dist","force"].includes(st(p)));
 const isS=r=>r.src[0]=="@";
+const RBTN=[...BTN,["lt","Left trigger (LT)"],["rt","Right trigger (RT)"]];
+const isTrig=r=>r.src=="lt"||r.src=="rt";
+const hit=r=>isTrig(r)?`${r.src} > 30`:`Button.${r.src} in pressed`;
 const opt=(a,cur)=>a.map(x=>`<option value="${x[0]}"${x[0]==cur?" selected":""}>${x[1]}</option>`).join("");
 const L=a=>a.map(x=>[x,x]);
 const fld=(l,i,c)=>`<label class="f ${c||""}"><span>${l}</span>${i}</label>`;
@@ -198,9 +216,9 @@ function renderRules(){
  const ms=pn(),sps=sp();
  $("rrows").innerHTML=S.rules.length?S.rules.map((r,i)=>{
   const sens=isS(r),p=sens?r.src.slice(1):"",t=sens?st(p):"";
-  const src=`<optgroup label="Controller">${opt(BTN,r.src)}</optgroup>`+(sps.length?`<optgroup label="Hub sensors">${opt(sps.map(q=>["@"+q,SN[st(q)]+" · port "+q]),r.src)}</optgroup>`:`<optgroup label="Hub sensors"><option disabled>First set a port to a sensor in step 1</option></optgroup>`);
+  const src=`<optgroup label="Controller">${opt(RBTN,r.src)}</optgroup>`+(sps.length?`<optgroup label="Hub sensors">${opt(sps.map(q=>["@"+q,SN[st(q)]+" · port "+q]),r.src)}</optgroup>`:`<optgroup label="Hub sensors"><option disabled>First set a port to a sensor in step 1</option></optgroup>`);
   let when=fld("Trigger",`<select data-f="src">${src}</select>`);
-  when+=sens?`<div class="sensbadge"><b>${p}</b><span>${SN[t]} on port ${p}</span></div>`:`<svg class="mini" viewBox="0 0 400 240" role="img" aria-label="Xbox controller: ${BTN.find(b=>b[0]==r.src)[1]} highlighted">${padInner(padSet(r.src))}</svg>`;
+  when+=sens?`<div class="sensbadge"><b>${p}</b><span>${SN[t]} on port ${p}</span></div>`:`<svg class="mini" viewBox="0 0 400 240" role="img" aria-label="Xbox controller: ${RBTN.find(b=>b[0]==r.src)[1]} highlighted. Click a control to choose it.">${padInner(padSet(r.src))}</svg><p class="hint">Tip: click a button on the picture to choose it.</p>`;
   if(!sens)when+=fld("How",`<select data-f="mode">${opt([["hold","While held down"],["toggle","Press to switch on / off"]],r.mode)}</select>`);
   else{const conds=t=="dist"?[["near","Is closer than"]]:t=="force"?[["press","Is pressed with at least"]]:[["color","Sees the color"],["dark","Reflection is below"],["bright","Reflection is above"]];
    when+=fld("Condition",`<select data-f="c">${opt(conds,r.c)}</select>`);
@@ -217,7 +235,7 @@ function renderRules(){
    <div class="cols"><div class="blk when"><span class="tag">WHEN</span>${when}</div><div class="blk then"><span class="tag">THEN</span>${then}</div></div></div>`}).join("")
  :`<p class="sub">No rules yet. Press “Add rule”.</p>`}
 
-const srcLabel=r=>isS(r)?SN[st(r.src.slice(1))]+" on port "+r.src.slice(1):BTN.find(b=>b[0]==r.src)[1]+(r.mode=="toggle"?" (toggle)":" (held)");
+const srcLabel=r=>isS(r)?SN[st(r.src.slice(1))]+" on port "+r.src.slice(1):RBTN.find(b=>b[0]==r.src)[1]+(r.mode=="toggle"?" (toggle)":" (held)");
 function cond(r){const p=r.src.slice(1),t=st(p),v=`sensor_${p.toLowerCase()}`;
  if(t=="dist")return `${v}.distance() < ${Math.round(r.v*10)}`;
  if(t=="force")return `${v}.pressed(force=${r.v})`;
@@ -226,11 +244,11 @@ function cond(r){const p=r.src.slice(1),t=st(p),v=`sensor_${p.toLowerCase()}`;
 function gen(){
  const ms=pn(),ok=S.maps.filter(m=>isM(m.motor)),rs=S.rules.filter(validR);
  const isStop=r=>r.act=="stopmotor"||r.act=="stopall",latch=r=>isStop(r)&&r.smode=="latch";
- const used=new Set(ok.map(m=>m.in));rs.forEach(r=>{if(latch(r))used.add(r.resume)});const has=a=>a.some(k=>used.has(k));
+ const used=new Set(ok.map(m=>m.in));rs.forEach(r=>{if(latch(r))used.add(r.resume);if(!isS(r)&&isTrig(r))used.add(r.src)});const has=a=>a.some(k=>used.has(k));
  const cls={color:"ColorSensor",dist:"UltrasonicSensor",force:"ForceSensor"};
  const pup=[...(ms.length?["Motor"]:[]),...["color","dist","force"].filter(t=>sp().some(p=>st(p)==t)).map(t=>cls[t])];
  const needColor=rs.some(r=>r.act=="light"||(isS(r)&&st(r.src.slice(1))=="color"&&r.c=="color"));
- const usesBtn=ok.some(m=>kind(m.in)=="btn")||rs.some(r=>!isS(r));
+ const usesBtn=ok.some(m=>kind(m.in)=="btn")||rs.some(r=>!isS(r)&&!isTrig(r));
  const fx=r=>["display","light","beep","rumble"].includes(r.act),tog=r=>!isS(r)&&r.mode=="toggle";
  let c=["from pybricks.hubs import PrimeHub",...(pup.length?[`from pybricks.pupdevices import ${pup.join(", ")}`]:[]),`from pybricks.parameters import Port, Direction, Button${needColor?", Color":""}`,"from pybricks.iodevices import XboxController","from pybricks.tools import wait","","hub = PrimeHub()"];
  ms.forEach(p=>c.push(`motor_${p.toLowerCase()} = Motor(Port.${p}, Direction.${S.ports[p].ccw?"COUNTERCLOCKWISE":"CLOCKWISE"})`));
@@ -247,13 +265,13 @@ function gen(){
  if(c.length>ns)c.push("");
  c.push("while True:");
  if(usesBtn)c.push("    pressed = controller.buttons.pressed()");
- if(has(["lx","ly"]))c.push("    lx, ly = controller.joystick_left()");
- if(has(["rx","ry"]))c.push("    rx, ry = controller.joystick_right()");
+ if(has(["lx","ly"])){c.push("    lx, ly = controller.joystick_left()");if(S.flip&&used.has("ly"))c.push("    ly = -ly  # inverted")}
+ if(has(["rx","ry"])){c.push("    rx, ry = controller.joystick_right()");if(S.flip&&used.has("ry"))c.push("    ry = -ry  # inverted")}
  if(has(["lt","rt"]))c.push("    lt, rt = controller.triggers()");
  rs.forEach((r,i)=>{const n=i+1;c.push("",`    # Rule ${n}: when ${srcLabel(r)}`);
   if(isS(r))c.push(`    r${n}_active = ${cond(r)}`);
-  else if(tog(r))c.push(`    r${n}_pressed = Button.${r.src} in pressed`,`    if r${n}_pressed and not r${n}_down:`,`        r${n}_on = not r${n}_on`,`    r${n}_down = r${n}_pressed`,`    r${n}_active = r${n}_on`);
-  else c.push(`    r${n}_active = Button.${r.src} in pressed`);
+  else if(tog(r))c.push(`    r${n}_pressed = ${hit(r)}`,`    if r${n}_pressed and not r${n}_down:`,`        r${n}_on = not r${n}_on`,`    r${n}_down = r${n}_pressed`,`    r${n}_active = r${n}_on`);
+  else c.push(`    r${n}_active = ${hit(r)}`);
   if(latch(r))c.push(`    if r${n}_active and not r${n}_prev:`,`        r${n}_stopped = True`,`        r${n}_ready = False`,`    r${n}_prev = r${n}_active`,`    if r${n}_stopped:`,`        if ${r.resume} <= 20:`,`            r${n}_ready = True  # stick back at neutral`,`        elif r${n}_ready:`,`            r${n}_stopped = False  # pushed forward again`)});
  ok.forEach((m,i)=>{if(m.act=="toggle"||m.act=="reset"){const mo=m.motor.toLowerCase();
   c.push("",`    down_${i} = Button.${m.in} in pressed`,`    if down_${i} and not was_down_${i}:`);
@@ -280,6 +298,7 @@ function gen(){
   if(b)c.push(`    elif r${n}_was and not r${n}_active:`,`        ${b}`);
   c.push(`    r${n}_was = r${n}_active`)});
  c.push("","    wait(20)");
+ c.push("","# --- Code Maker settings: lets you paste this program back into the app (keep this line) ---","# CM1 "+JSON.stringify({ports:S.ports,maps:S.maps,rules:S.rules,max:S.max,dz:S.dz,idle:S.idle,name:S.name,flip:S.flip}));
  return c.join("\n")}
 
 /* controller drawing */
@@ -288,10 +307,10 @@ const padSet=k=>{const u=new Set([k]);for(const s in SV)if(SV[s].includes(k))u.a
 function padInner(u){
  const e=(t,a,k)=>`<${t} class="p${u&&u.has(k)?" on":""}" data-k="${k}" ${a}/>`;
  return `<path class="body" d="M72 62Q60 56 100 52H300Q340 56 328 62L372 190Q378 218 350 218Q322 218 306 188L292 162H108L94 188Q78 218 50 218Q22 218 28 190Z"/>
- ${e("rect",'x="86" y="20" width="50" height="14" rx="6"',"lt")}<text x="100" y="31">LT</text>
- ${e("rect",'x="264" y="20" width="50" height="14" rx="6"',"rt")}<text x="278" y="31">RT</text>
- ${e("rect",'x="76" y="38" width="66" height="12" rx="5"',"LB")}<text x="100" y="48">LB</text>
- ${e("rect",'x="258" y="38" width="66" height="12" rx="5"',"RB")}<text x="282" y="48">RB</text>
+ ${e("rect",'x="80" y="6" width="62" height="24" rx="8"',"lt")}<text x="102" y="22">LT</text>
+ ${e("rect",'x="258" y="6" width="62" height="24" rx="8"',"rt")}<text x="280" y="22">RT</text>
+ ${e("rect",'x="76" y="33" width="66" height="16" rx="6"',"LB")}<text x="100" y="45">LB</text>
+ ${e("rect",'x="258" y="33" width="66" height="16" rx="6"',"RB")}<text x="282" y="45">RB</text>
  ${e("circle",'cx="112" cy="100" r="22"',"lstick")}<text x="104" y="104">L</text>
  ${e("circle",'cx="250" cy="150" r="22"',"rstick")}<text x="246" y="154">R</text>
  ${e("rect",'x="148" y="126" width="16" height="16" rx="3"',"UP")}${e("rect",'x="148" y="162" width="16" height="16" rx="3"',"DOWN")}
@@ -330,6 +349,7 @@ $("rrows").addEventListener("change",e=>{const el=e.target.closest(".rule");if(!
 $("rrows").addEventListener("input",e=>{if(e.target.dataset.f=="v"){S.rules[+e.target.closest(".rule").dataset.i].v=Math.max(0,+e.target.value||0);update()}});
 $("rrows").addEventListener("click",e=>{const t=e.target,el=t.closest(".rule");if(!el)return;const r=S.rules[+el.dataset.i];
  if(t.dataset.f=="del"){S.rules.splice(+el.dataset.i,1);full()}
+ else if(t.closest("svg.mini")){const k=t.dataset.k;if(k){r.src=k=="lstick"?"LJ":k=="rstick"?"RJ":k;full()}}
  else if(t.dataset.k!==undefined){const k=+t.dataset.k,g=[...r.grid];g[k]=g[k]=="1"?"0":"1";r.grid=g.join("");t.classList.toggle("on");update()}
  else if(t.dataset.pre){r.grid=PRE[t.dataset.pre];full()}});
 
@@ -340,6 +360,95 @@ $("cname").oninput=e=>{S.name=e.target.value;update()};
 $("copy").onclick=async()=>{const t=$("code").textContent;let ok=false;
  try{await navigator.clipboard.writeText(t);ok=true}catch(_){try{const r=document.createRange();r.selectNodeContents($("code"));const s=getSelection();s.removeAllRanges();s.addRange(r);ok=document.execCommand("copy")}catch(_2){}}
  $("msg").textContent=ok?"Copied! Now paste it into code.pybricks.com ✔":"Select the code and press Ctrl+C.";setTimeout(()=>$("msg").textContent="",3500)};
+
+
+/* ---------- import existing code ---------- */
+const okKey=k=>INPUTS.some(i=>i[0]==k);
+function resetState(){PORTS.forEach(p=>S.ports[p]={t:"none",ccw:false});S.maps=[];S.rules=[]}
+function syncSettings(){$("max").value=S.max;$("dz").value=S.dz;$("idle").value=S.idle;$("cname").value=S.name;$("flip").checked=!!S.flip}
+function fromMarker(t){
+ const m=t.match(/^#\s*CM1\s+(\{.*\})\s*$/m);if(!m)return null;
+ let d;try{d=JSON.parse(m[1])}catch(_){return null}
+ if(!d||typeof d!="object"||!d.ports)return null;
+ resetState();
+ PORTS.forEach(p=>{const s=d.ports[p];if(s&&TYPES.some(x=>x[0]==s.t))S.ports[p]={t:s.t,ccw:!!s.ccw}});
+ S.max=Math.max(100,Math.min(1000,+d.max||800));S.dz=Math.max(0,Math.min(50,isNaN(+d.dz)?10:+d.dz));
+ S.idle=["brake","stop","hold"].includes(d.idle)?d.idle:"brake";S.name=typeof d.name=="string"?d.name:"";S.flip=!!d.flip;
+ (d.maps||[]).forEach(x=>{if(!x||!okKey(x.in))return;const k=kind(x.in);
+  S.maps.push(mkMap(x.in,{act:ACT[k].some(a=>a[0]==x.act)?x.act:ACT[k][0][0],motor:PORTS.includes(x.motor)?x.motor:"",pct:Math.max(1,Math.min(100,+x.pct||100)),inv:!!x.inv}))});
+ (d.rules||[]).forEach(x=>{if(!x||typeof x.src!="string")return;
+  if(!(RBTN.some(b=>b[0]==x.src)||(x.src[0]=="@"&&PORTS.includes(x.src.slice(1)))))return;
+  const r=mkRule();["src","mode","c","col","act","tm","lc","smode","resume"].forEach(f=>{if(typeof x[f]=="string")r[f]=x[f]});
+  if(!isNaN(+x.v))r.v=+x.v;r.blink=!!x.blink;if(typeof x.grid=="string"&&/^[01]{25}$/.test(x.grid))r.grid=x.grid;
+  if(!RACT.some(a=>a[0]==r.act))r.act="display";if(!SMODE.some(a=>a[0]==r.smode))r.smode="while";if(!okKey(r.resume))r.resume="ly";
+  S.rules.push(r)});
+ S.rules.forEach(fixR);
+ return {ok:true,msg:`Loaded ${PORTS.filter(isM).length} motor(s), ${sp().length} sensor(s), ${S.maps.length} mapping(s) and ${S.rules.length} rule(s).`}}
+function fromCode(t){
+ resetState();let m,skipped=0;
+ for(const m of t.matchAll(/Motor\(\s*Port\.([A-F])\s*(?:,\s*Direction\.(\w+))?\s*\)/g))S.ports[m[1]]={t:"motor",ccw:m[2]=="COUNTERCLOCKWISE"};
+ const SC={ColorSensor:"color",UltrasonicSensor:"dist",ForceSensor:"force"};
+ for(const m of t.matchAll(/(ColorSensor|UltrasonicSensor|ForceSensor)\(\s*Port\.([A-F])\s*\)/g))S.ports[m[2]]={t:SC[m[1]],ccw:false};
+ S.dz=(m=t.match(/joystick_deadzone\s*=\s*(\d+)/))?Math.min(50,+m[1]):10;
+ S.name=(m=t.match(/XboxController\([^)]*name\s*=\s*"([^"]*)"/))?m[1]:"";
+ S.max=(m=t.match(/max\(\s*-(\d+)\s*,\s*min\(/))?Math.max(100,Math.min(1000,+m[1])):800;
+ S.idle=(m=t.match(/motor_\w+\.(brake|stop|hold)\(\)/))?m[1]:"brake";
+ S.flip=/\b(ly|ry)\s*=\s*-\1\b/.test(t);
+ const ents=[],U=s=>s.toUpperCase(),cp=v=>Math.max(1,Math.min(100,Math.round(Math.abs(v)/S.max*100)));
+ for(const m of t.matchAll(/speed_(\w+)\s*\+=\s*int\(\s*(lx|ly|rx|ry|lt|rt)\s*\*\s*(-?[\d.]+)\s*\)/g))
+  ents.push([m.index,mkMap(m[2],{motor:U(m[1]),pct:Math.max(1,Math.min(100,Math.round(Math.abs(+m[3])*10000/S.max))),inv:+m[3]<0})]);
+ for(const m of t.matchAll(/if Button\.(\w+) in pressed:[^\n]*\n\s*speed_(\w+)\s*\+=\s*(-?\d+)/g))
+  if(okKey(m[1])&&kind(m[1])=="btn")ents.push([m.index,mkMap(m[1],{act:"hold",motor:U(m[2]),pct:cp(+m[3]),inv:+m[3]<0})]);
+ const dk={};for(const m of t.matchAll(/down_(\d+)\s*=\s*Button\.(\w+) in pressed/g))dk[m[1]]=m[2];
+ for(const m of t.matchAll(/if running_(\d+):[^\n]*\n\s*speed_(\w+)\s*\+=\s*(-?\d+)/g))
+  if(dk[m[1]]&&okKey(dk[m[1]]))ents.push([m.index,mkMap(dk[m[1]],{act:"toggle",motor:U(m[2]),pct:cp(+m[3]),inv:+m[3]<0})]);
+ for(const m of t.matchAll(/if down_(\d+) and not was_down_\1:\s*\n\s*motor_(\w+)\.reset_angle\(0\)/g))
+  if(dk[m[1]]&&okKey(dk[m[1]]))ents.push([m.index,mkMap(dk[m[1]],{act:"reset",motor:U(m[2])})]);
+ S.maps=ents.filter(e=>isM(e[1].motor)).sort((a,b)=>a[0]-b[0]).map(e=>e[1]);
+ const ids=[...new Set([...t.matchAll(/\br(\d+)_active\s*=/g)].map(m=>+m[1]))].sort((a,b)=>a-b);
+ for(const id of ids){
+  const r=mkRule(),tog=new RegExp(`r${id}_on = not r${id}_on`).test(t);let m;
+  if(tog){m=t.match(new RegExp(`r${id}_pressed\\s*=\\s*(?:Button\\.(\\w+) in pressed|(lt|rt) > \\d+)`));if(m){r.src=m[1]||m[2];r.mode="toggle"}}
+  else{m=t.match(new RegExp(`r${id}_active\\s*=\\s*(?:Button\\.(\\w+) in pressed|(lt|rt) > \\d+|sensor_(\\w+)\\.([^\\n]+))`));
+   if(m&&m[3]){const p=U(m[3]),e=m[4];let q;r.src="@"+p;
+    if(q=e.match(/^distance\(\)\s*<\s*(\d+)/)){r.c="near";r.v=Math.round(+q[1])/10}
+    else if(q=e.match(/^pressed\(force=([\d.]+)\)/)){r.c="press";r.v=+q[1]}
+    else if(q=e.match(/^color\(\)\s*==\s*Color\.(\w+)/)){r.c="color";r.col=COLS.includes(q[1])?q[1]:"RED"}
+    else if(q=e.match(/^reflection\(\)\s*([<>])\s*(\d+)/)){r.c=q[1]=="<"?"dark":"bright";r.v=+q[2]}
+    else m=null}
+   else if(m){r.src=m[1]||m[2];r.mode="hold"}}
+  if(!m||!(RBTN.some(b=>b[0]==r.src)||(r.src[0]=="@"&&sp().includes(r.src.slice(1))))){skipped++;continue}
+  const eff=t.match(new RegExp(`if r${id}_active and not r${id}_was:\\s*\\n\\s*([^\\n]+)`));let a=null,q;
+  if(eff){const l=eff[1];
+   if(q=l.match(/hub\.display\.icon\(PIC_(\d+)\)/)){a="display";r.blink=false;r._p=q[1]}
+   else if(q=l.match(/hub\.display\.animate\(\[PIC_(\d+),\s*BLANK\]/)){a="display";r.blink=true;r._p=q[1]}
+   else if(q=l.match(/hub\.light\.on\(Color\.(\w+)\)/)){a="light";r.blink=false;r.lc=LCOLS.includes(q[1])?q[1]:"GREEN"}
+   else if(q=l.match(/hub\.light\.blink\(Color\.(\w+)/)){a="light";r.blink=true;r.lc=LCOLS.includes(q[1])?q[1]:"GREEN"}
+   else if(/hub\.speaker\.beep/.test(l))a="beep";else if(/controller\.rumble/.test(l))a="rumble"}
+  else{
+   const L=[...t.matchAll(new RegExp(`if r${id}_stopped:\\s*\\n\\s*speed_(\\w+)\\s*=\\s*0`,"g"))].map(x=>U(x[1])),
+    F=[...t.matchAll(new RegExp(`if r${id}_active:\\s*\\n\\s*speed_(\\w+)\\s*=\\s*min\\(`,"g"))].map(x=>U(x[1])),
+    W=[...t.matchAll(new RegExp(`if r${id}_active:\\s*\\n\\s*speed_(\\w+)\\s*=\\s*0`,"g"))].map(x=>U(x[1]));
+   const ms=L.length?L:F.length?F:W;
+   if(ms.length){r.smode=L.length?"latch":F.length?"forward":"while";r.act=ms.length>1?"stopall":"stopmotor";r.tm=ms[0];a=r.act;
+    if(L.length){const z=t.match(new RegExp(`if r${id}_stopped:\\s*\\n\\s*if (\\w+) <= 20`));if(z&&okKey(z[1]))r.resume=z[1]}}}
+  if(!a){skipped++;continue}
+  r.act=a;
+  if(a=="display"){const b=t.match(new RegExp(`PIC_${r._p} = \\[([\\s\\S]*?)\\n\\]`));
+   const nums=b?[...b[1].matchAll(/\d+/g)].map(x=>+x[0]):[];if(nums.length==25)r.grid=nums.map(v=>v>0?"1":"0").join("")}
+  delete r._p;S.rules.push(r)}
+ S.rules.forEach(fixR);
+ if(!PORTS.some(p=>S.ports[p].t!="none")&&!S.maps.length&&!S.rules.length)return {ok:false,msg:"I couldn’t find any motors, sensors or controller mappings in this code. Is it a Pybricks program?"};
+ return {ok:true,msg:`Loaded ${PORTS.filter(isM).length} motor(s), ${sp().length} sensor(s), ${S.maps.length} mapping(s) and ${S.rules.length} rule(s).`+(skipped?` ${skipped} rule(s) could not be understood and were left out.`:"")}}
+function importCode(t){
+ t=t.replace(/\r/g,"");const bak=JSON.stringify(S);let res;
+ try{res=fromMarker(t)||fromCode(t)}catch(err){res={ok:false,msg:"Sorry, I couldn’t read this code."}}
+ if(!res.ok){Object.assign(S,JSON.parse(bak));return res}
+ syncSettings();full();return res}
+$("imp-go").onclick=()=>{const t=$("imp-t").value,m=$("imp-msg");
+ if(!t.trim()){m.textContent="Paste some code first.";m.style.color="var(--red)";return}
+ const r=importCode(t);m.textContent=r.msg;m.style.color=r.ok?"var(--grn)":"var(--red)"};
+$("flip").onchange=e=>{S.flip=e.target.checked;update()};
 
 tank();S.rules=[mkRule()];drawPad();full();
 </script>
