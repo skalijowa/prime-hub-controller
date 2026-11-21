@@ -147,6 +147,9 @@ const SN={color:"Color Sensor",dist:"Distance Sensor",force:"Force Sensor"};
 const COLS=["RED","YELLOW","GREEN","BLUE","WHITE","NONE"],LCOLS=["RED","GREEN","BLUE","YELLOW","WHITE"];
 const RACT=[["display","Show a picture on the hub display"],["light","Hub button light"],["beep","Beep"],["rumble","Rumble the controller"],["stopmotor","Stop a motor"],["stopall","Stop all motors"]];
 const HINT={display:"Shown while the trigger is active, then the display turns off.",light:"On while the trigger is active, then turns off.",beep:"Beeps once when the trigger starts.",rumble:"Rumbles once when the trigger starts.",stopmotor:"The motor is held at zero while the trigger is active.",stopall:"All motors are held at zero while the trigger is active."};
+const SMODE=[["while","Stop while the trigger is active"],["forward","Block only forward (reverse still works)"],["latch","Stay stopped until I push the stick forward again"]];
+const hintFor=r=>{if(r.act!="stopmotor"&&r.act!="stopall")return HINT[r.act];const w=r.act=="stopall"?"All motors":"The motor";
+ return r.smode=="forward"?w+" can’t drive forward while the trigger is active, but you can still reverse and turn.":r.smode=="latch"?w+" stops when the trigger starts and stays stopped. Release the stick to neutral, then push it forward again to drive on (even if the object is still close, so be careful).":w+" is held at zero while the trigger is active."};
 const P=(...r)=>r.join("");
 const PRE={heart:P("01010","11111","11111","01110","00100"),smile:P("01010","00000","00000","10001","01110"),up:P("00100","01110","10101","00100","00100"),down:P("00100","00100","10101","01110","00100"),left:P("00100","01000","11111","01000","00100"),right:P("00100","00010","11111","00010","00100"),check:P("00000","00001","00010","10100","01000"),cross:P("10001","01010","00100","01010","10001"),all:"1".repeat(25),clear:"0".repeat(25)};
 const CHIPS=[["heart","❤"],["smile","☺"],["up","↑"],["down","↓"],["left","←"],["right","→"],["check","✓"],["cross","✕"],["all","■"],["clear","Clear"]];
@@ -167,7 +170,7 @@ function mkMap(i,m){return Object.assign({in:i,act:kind(i)=="axis"?"axis":"hold"
 function tank(){S.ports.A={t:"motor",ccw:false};S.ports.B={t:"motor",ccw:true};S.maps=[mkMap("ly",{motor:"A"}),mkMap("ry",{motor:"B"})]}
 function trig(){S.maps=[mkMap("rt",{motor:"A"}),mkMap("lt",{motor:"A",inv:true}),mkMap("lx",{motor:"B"})]}
 function sdef(r){const t=st(r.src.slice(1));Object.assign(r,t=="dist"?{c:"near",v:15}:t=="force"?{c:"press",v:3}:{c:"color",col:"RED",v:30})}
-function mkRule(){return {src:"A",mode:"hold",c:"near",v:15,col:"RED",act:"display",tm:pn()[0]||"",lc:"GREEN",blink:false,grid:PRE.heart}}
+function mkRule(){return {src:"A",mode:"hold",c:"near",v:15,col:"RED",act:"display",tm:pn()[0]||"",lc:"GREEN",blink:false,grid:PRE.heart,smode:"while",resume:"ly"}}
 function fixR(r){if(isS(r)){const p=r.src.slice(1),t=st(p);if(!sp().includes(p)){r.src="A"}else if((t=="dist"&&r.c!="near")||(t=="force"&&r.c!="press")||(t=="color"&&!["color","dark","bright"].includes(r.c)))sdef(r)}
  if(!isM(r.tm))r.tm=pn()[0]||""}
 const validR=r=>(!isS(r)||sp().includes(r.src.slice(1)))&&(r.act!="stopmotor"||isM(r.tm));
@@ -208,7 +211,8 @@ function renderRules(){
    <label class="f chk"><input type="checkbox" data-f="blink"${r.blink?" checked":""}><span>Blink the picture</span></label>`;
   if(r.act=="light")then+=fld("Color",`<select data-f="lc">${opt(L(LCOLS),r.lc)}</select>`)+`<label class="f chk"><input type="checkbox" data-f="blink"${r.blink?" checked":""}><span>Blink</span></label>`;
   if(r.act=="stopmotor")then+=fld("Motor",`<select data-f="tm">${ms.length?opt(ms.map(q=>[q,"Motor "+q]),r.tm):"<option value=''>no motor</option>"}</select>`);
-  then+=`<p class="hint">${HINT[r.act]}</p>`;
+  if(r.act=="stopmotor"||r.act=="stopall"){then+=fld("Stop mode",`<select data-f="smode">${opt(SMODE,r.smode)}</select>`);if(r.smode=="latch")then+=fld("Resume when I push",`<select data-f="resume">${opt(AXES,r.resume)}</select>`)}
+  then+=`<p class="hint">${hintFor(r)}</p>`;
   return `<div class="rule" data-i="${i}"><div class="rhead"><span>Rule ${i+1}</span><button class="btn-x" data-f="del">✕ Remove</button></div>
    <div class="cols"><div class="blk when"><span class="tag">WHEN</span>${when}</div><div class="blk then"><span class="tag">THEN</span>${then}</div></div></div>`}).join("")
  :`<p class="sub">No rules yet. Press “Add rule”.</p>`}
@@ -221,7 +225,8 @@ function cond(r){const p=r.src.slice(1),t=st(p),v=`sensor_${p.toLowerCase()}`;
 
 function gen(){
  const ms=pn(),ok=S.maps.filter(m=>isM(m.motor)),rs=S.rules.filter(validR);
- const used=new Set(ok.map(m=>m.in)),has=a=>a.some(k=>used.has(k));
+ const isStop=r=>r.act=="stopmotor"||r.act=="stopall",latch=r=>isStop(r)&&r.smode=="latch";
+ const used=new Set(ok.map(m=>m.in));rs.forEach(r=>{if(latch(r))used.add(r.resume)});const has=a=>a.some(k=>used.has(k));
  const cls={color:"ColorSensor",dist:"UltrasonicSensor",force:"ForceSensor"};
  const pup=[...(ms.length?["Motor"]:[]),...["color","dist","force"].filter(t=>sp().some(p=>st(p)==t)).map(t=>cls[t])];
  const needColor=rs.some(r=>r.act=="light"||(isS(r)&&st(r.src.slice(1))=="color"&&r.c=="color"));
@@ -238,7 +243,7 @@ function gen(){
  if(c.length>nd)c.push("");
  const ns=c.length;
  ok.forEach((m,i)=>{if(m.act=="toggle")c.push(`running_${i} = False`);if(m.act=="toggle"||m.act=="reset")c.push(`was_down_${i} = False`)});
- rs.forEach((r,i)=>{const n=i+1;if(fx(r))c.push(`r${n}_was = False`);if(tog(r))c.push(`r${n}_on = False`,`r${n}_down = False`)});
+ rs.forEach((r,i)=>{const n=i+1;if(fx(r))c.push(`r${n}_was = False`);if(tog(r))c.push(`r${n}_on = False`,`r${n}_down = False`);if(latch(r))c.push(`r${n}_stopped = False`,`r${n}_ready = False`,`r${n}_prev = False`)});
  if(c.length>ns)c.push("");
  c.push("while True:");
  if(usesBtn)c.push("    pressed = controller.buttons.pressed()");
@@ -248,7 +253,8 @@ function gen(){
  rs.forEach((r,i)=>{const n=i+1;c.push("",`    # Rule ${n}: when ${srcLabel(r)}`);
   if(isS(r))c.push(`    r${n}_active = ${cond(r)}`);
   else if(tog(r))c.push(`    r${n}_pressed = Button.${r.src} in pressed`,`    if r${n}_pressed and not r${n}_down:`,`        r${n}_on = not r${n}_on`,`    r${n}_down = r${n}_pressed`,`    r${n}_active = r${n}_on`);
-  else c.push(`    r${n}_active = Button.${r.src} in pressed`)});
+  else c.push(`    r${n}_active = Button.${r.src} in pressed`);
+  if(latch(r))c.push(`    if r${n}_active and not r${n}_prev:`,`        r${n}_stopped = True`,`        r${n}_ready = False`,`    r${n}_prev = r${n}_active`,`    if r${n}_stopped:`,`        if ${r.resume} <= 20:`,`            r${n}_ready = True  # stick back at neutral`,`        elif r${n}_ready:`,`            r${n}_stopped = False  # pushed forward again`)});
  ok.forEach((m,i)=>{if(m.act=="toggle"||m.act=="reset"){const mo=m.motor.toLowerCase();
   c.push("",`    down_${i} = Button.${m.in} in pressed`,`    if down_${i} and not was_down_${i}:`);
   c.push(m.act=="toggle"?`        running_${i} = not running_${i}`:`        motor_${mo}.reset_angle(0)`);
@@ -260,7 +266,10 @@ function gen(){
    else if(m.act=="hold")c.push(`    if Button.${m.in} in pressed:  # ${lab}`,`        speed_${l} += ${f}`);
    else c.push(`    if running_${i}:  # ${lab} toggles`,`        speed_${l} += ${f}`)});
   if(mine.length){c.push(`    speed_${l} = max(-${S.max}, min(${S.max}, speed_${l}))`);
-   rs.forEach((r,j)=>{if(r.act=="stopall"||(r.act=="stopmotor"&&r.tm==p))c.push(`    if r${j+1}_active:`,`        speed_${l} = 0  # rule ${j+1}`)});
+   rs.forEach((r,j)=>{if(r.act=="stopall"||(r.act=="stopmotor"&&r.tm==p)){const n=j+1;
+    if(r.smode=="latch")c.push(`    if r${n}_stopped:`,`        speed_${l} = 0  # rule ${n}`);
+    else if(r.smode=="forward")c.push(`    if r${n}_active:`,`        speed_${l} = min(speed_${l}, 0)  # rule ${n}: reverse only`);
+    else c.push(`    if r${n}_active:`,`        speed_${l} = 0  # rule ${n}`)}});
    c.push(`    if speed_${l} != 0:`,`        motor_${l}.run(speed_${l})`,`    else:`,`        motor_${l}.${S.idle}()`)}
   else c.push(`    motor_${l}.${S.idle}()  # nothing mapped yet`)});
  rs.forEach((r,i)=>{const n=i+1;if(!fx(r))return;let a,b="";
