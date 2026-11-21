@@ -17,10 +17,18 @@ header{max-width:1080px;margin:0 auto;padding:16px 14px 2px;display:flex;gap:12p
 .logo i:nth-child(1){background:var(--red)}.logo i:nth-child(2){background:var(--yel)}.logo i:nth-child(3){background:var(--blue)}.logo i:nth-child(4){background:var(--grn)}
 h1{margin:0;font-size:1.3rem;line-height:1.2}
 header p{margin:2px 0 0;color:var(--mute);font-size:.9rem}
-main{max-width:1080px;margin:0 auto;padding:14px 14px 40px;display:grid;gap:16px}
-section{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:16px;min-width:0}
+main{max-width:1080px;margin:0 auto;padding:18px 14px 48px;display:grid;gap:30px}
+section{--acc:var(--mute);--accink:#fff;background:color-mix(in srgb,var(--acc) 8%,var(--card));border:2px solid color-mix(in srgb,var(--acc) 30%,var(--card));border-top:8px solid var(--acc);border-radius:16px;padding:18px 16px 18px;min-width:0;box-shadow:0 2px 0 color-mix(in srgb,var(--acc) 18%,transparent)}
+section.s0{--acc:#8a8a96}
+section.s1{--acc:#f2b600;--accink:#1b1b1f}
+section.s2{--acc:#0055bf}
+section.s3{--acc:#107c10}
+section.s4{--acc:#e3000b}
+section.s5{--acc:#4a4f5e}
+section h2{padding-bottom:10px;margin-bottom:8px;border-bottom:2px solid color-mix(in srgb,var(--acc) 25%,transparent)}
+.card,.rule{background:var(--card)}
 h2{margin:0 0 4px;font-size:1.1rem;display:flex;align-items:center;gap:10px}
-.n{background:var(--blue);color:#fff;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:.9rem;flex:none}
+.n{background:var(--acc);color:var(--accink);width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:.9rem;flex:none}
 .sub{margin:0 0 12px;color:var(--mute);font-size:.9rem}
 select,input[type=number],input[type=text]{font:inherit;padding:8px;border-radius:8px;border:2px solid var(--line);background:var(--card);color:var(--ink);min-width:0;width:100%;text-overflow:ellipsis}
 button{font:inherit;cursor:pointer;border-radius:8px;border:2px solid var(--line);background:var(--card);color:var(--ink);padding:8px 12px}
@@ -60,6 +68,20 @@ svg{width:100%;max-width:440px;height:auto;justify-self:center}
 .pxc.on{background:var(--yel);box-shadow:0 0 8px rgba(255,213,0,.7)}
 details summary{cursor:pointer;font-weight:800;font-size:1.05rem}
 textarea{width:100%;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;background:var(--code);color:var(--codeink);border:2px solid var(--line);border-radius:12px;padding:12px;resize:vertical;margin:10px 0 4px}
+input[type=range]{width:100%;accent-color:var(--blue)}
+output{text-transform:none;letter-spacing:0;font-weight:700;color:var(--ink);font-size:.95rem}
+.piano{position:relative;display:flex;height:120px;width:100%;max-width:380px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.wk{flex:1;min-width:0;border:1px solid #2b2b31;background:#fff;color:#555;border-radius:0 0 6px 6px;padding:0 0 4px;font-size:.7rem;display:flex;align-items:flex-end;justify-content:center}
+.wk:active{background:var(--yel)}
+.bk{position:absolute;top:0;width:7.2%;height:62%;background:#1b1b1f;border:1px solid #000;border-radius:0 0 4px 4px;padding:0;z-index:2}
+.bk:active{background:var(--blue)}
+.octrow{display:flex;align-items:center;gap:10px;font-weight:800}
+.lens{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.lens button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.nchips{display:flex;gap:6px;flex-wrap:wrap;min-height:34px;align-items:center;background:var(--card);border:2px dashed var(--line);border-radius:10px;padding:6px}
+.nchip{background:var(--yel);color:#1b1b1f;border:0;border-radius:99px;padding:3px 10px;font-weight:800;font-size:.85rem}
+.btn-play{background:var(--grn);color:#fff;border-color:var(--grn);font-weight:700}
+.sm{padding:5px 10px;font-size:.85rem}
 svg.mini{max-width:280px;justify-self:start}
 svg.mini [data-k]{cursor:pointer}
 svg.mini .p:hover{stroke:var(--blue);stroke-width:4}
@@ -88,7 +110,7 @@ ol b{color:var(--ink)}
   <div><h1>Spike Prime × Xbox Code Maker</h1><p>Set up your hub, map the controller, copy the Pybricks code.</p></div>
 </header>
 <main>
-<section>
+<section class="s0">
   <details id="imp">
     <summary>📥 Already have a program? Paste it here to keep editing it</summary>
     <p class="sub" style="margin-top:8px">Paste your current Pybricks code and press Load. The app fills in the ports, controller mappings and rules below. Code made by this app is understood best. Anything hand-written (own functions, extra loops) is not kept, because the app writes the code again from the settings. Loading replaces what is set now.</p>
@@ -97,13 +119,13 @@ ol b{color:var(--ink)}
   </details>
 </section>
 
-<section>
+<section class="s1">
   <h2><span class="n">1</span>Your SPIKE Prime hub</h2>
   <p class="sub">Choose what is plugged into each port. Use the direction button to flip a motor that is mounted the other way round.</p>
   <div class="hub"><div class="studs"><i></i><i></i><i></i><i></i><i></i></div><div class="ports" id="ports"></div></div>
 </section>
 
-<section>
+<section class="s2">
   <h2><span class="n">2</span>Controller → motors</h2>
   <p class="sub">Each card connects one control on the Xbox controller to one motor. Several cards can drive the same motor (e.g. right trigger = forward, left trigger = backward). Car drives the wrong way? Tick <b>Reverse</b> on that card, flip the motor with its direction button in step 1, or use “Invert up/down on both sticks” in step 4.</p>
   <div class="pad">
@@ -118,14 +140,14 @@ ol b{color:var(--ink)}
   </div>
 </section>
 
-<section>
+<section class="s3">
   <h2><span class="n">3</span>When this happens → do this</h2>
   <p class="sub">Pick a trigger (a controller button, or a sensor you added in step 1: set a port to Color, Distance or Force) and what should happen: light up the hub’s 5×5 display, blink the light, beep, rumble the controller or stop motors.</p>
   <div id="rrows"></div>
   <div class="bar"><button class="btn-main" id="radd">+ Add rule</button></div>
 </section>
 
-<section>
+<section class="s4">
   <h2><span class="n">4</span>Settings</h2>
   <div class="set">
     <label class="f">Max motor speed (deg/s)<input type="number" id="max" min="100" max="1000" step="50" value="800"></label>
@@ -136,7 +158,7 @@ ol b{color:var(--ink)}
   </div>
 </section>
 
-<section>
+<section class="s5">
   <h2><span class="n">5</span>Your Pybricks program</h2>
   <p class="sub">The code updates automatically while you change things above.</p>
   <div class="bar" style="margin:0 0 10px"><button class="btn-grn" id="copy">Copy code</button><span id="msg" class="sub" style="align-self:center;margin:0"></span></div>
@@ -188,7 +210,7 @@ function mkMap(i,m){return Object.assign({in:i,act:kind(i)=="axis"?"axis":"hold"
 function tank(){S.ports.A={t:"motor",ccw:false};S.ports.B={t:"motor",ccw:true};S.maps=[mkMap("ly",{motor:"A"}),mkMap("ry",{motor:"B"})]}
 function trig(){S.maps=[mkMap("rt",{motor:"A"}),mkMap("lt",{motor:"A",inv:true}),mkMap("lx",{motor:"B"})]}
 function sdef(r){const t=st(r.src.slice(1));Object.assign(r,t=="dist"?{c:"near",v:15}:t=="force"?{c:"press",v:3}:{c:"color",col:"RED",v:30})}
-function mkRule(){return {src:"A",mode:"hold",c:"near",v:15,col:"RED",act:"display",tm:pn()[0]||"",lc:"GREEN",blink:false,grid:PRE.heart,smode:"while",resume:"ly"}}
+function mkRule(){return {src:"A",mode:"hold",c:"near",v:15,col:"RED",act:"display",tm:pn()[0]||"",lc:"GREEN",blink:false,grid:PRE.heart,smode:"while",resume:"ly",bm:"simple",freq:800,dur:150,notes:[],tempo:120,nl:"4",oct:4}}
 function fixR(r){if(isS(r)){const p=r.src.slice(1),t=st(p);if(!sp().includes(p)){r.src="A"}else if((t=="dist"&&r.c!="near")||(t=="force"&&r.c!="press")||(t=="color"&&!["color","dark","bright"].includes(r.c)))sdef(r)}
  if(!isM(r.tm))r.tm=pn()[0]||""}
 const validR=r=>(!isS(r)||sp().includes(r.src.slice(1)))&&(r.act!="stopmotor"||isM(r.tm));
@@ -212,6 +234,35 @@ function renderRows(){
   ${bad?`<div class="warn">Pick a port that has a motor (step 1).</div>`:""}</div>`}).join("")
  :`<p class="sub">No mappings yet. Press “Add mapping” or try a preset.</p>`}
 
+
+const NN=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"],WH=["C","D","E","F","G","A","B"];
+const NOTE_RE=/^[A-G]#?[2-8]\/(1|2|4|8|16)$/;
+const LENS=[["8","⅛"],["4","¼"],["2","½"],["1","1"]],LSYM={"1":"1","2":"½","4":"¼","8":"⅛","16":"1/16"};
+const TUNES={alarm:{n:["A5/8","E5/8","A5/8","E5/8"],t:160},happy:{n:["C5/8","E5/8","G5/8","C6/4"],t:140},sad:{n:["G4/4","E4/4","C4/2"],t:90},ding:{n:["E6/4"],t:120}};
+const noteHz=n=>{const m=n.match(/^([A-G]#?)(\d)/);return Math.round(440*Math.pow(2,(12*(+m[2]+1)+NN.indexOf(m[1])-69)/12))};
+const noteMs=(n,tempo)=>4/(+n.split("/")[1])*60000/tempo;
+const tuneMs=r=>r.notes.reduce((s,n)=>s+noteMs(n,r.tempo),0);
+let AC;function tone(seq){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state=="suspended")AC.resume();let t=AC.currentTime+0.02;
+ seq.forEach(([f,d])=>{const o=AC.createOscillator(),g=AC.createGain();o.type="square";o.frequency.value=f;g.gain.setValueAtTime(0.06,t);g.gain.setValueAtTime(0,t+d/1000-0.01);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d/1000);t+=d/1000})}catch(_){}}
+const seqOf=r=>r.bm=="melody"?r.notes.map(n=>[noteHz(n),noteMs(n,r.tempo)*0.92]):[[r.freq,r.dur]];
+const piano=o=>{let w="",b="";
+ for(let i=0;i<8;i++){const n=WH[i%7]+(o+(i==7?1:0));w+=`<button type="button" class="wk" data-note="${n}" aria-label="${n}">${i%7==0?n:""}</button>`}
+ [0,1,3,4,5].forEach(i=>{const n=WH[i]+"#"+o;b+=`<button type="button" class="bk" style="left:calc(${(i+1)*12.5}% - 3.6%)" data-note="${n}" aria-label="${n}"></button>`});
+ return `<div class="piano">${w}${b}</div>`};
+function beepUI(r){
+ let s=fld("Sound",`<select data-f="bm">${opt([["simple","Simple beep"],["melody","Melody (play it on the piano)"]],r.bm)}</select>`);
+ if(r.bm=="simple")return s+fld("Pitch (low → high)",`<input type="range" data-f="freq" min="100" max="2000" step="10" value="${Math.max(100,Math.min(2000,r.freq))}"><output>${r.freq} Hz</output>`)+fld("Length (ms)",`<input type="number" data-f="dur" min="20" max="3000" step="10" value="${r.dur}">`)+`<button type="button" class="btn-play" data-tact="play">▶ Listen</button>`;
+ const ms=tuneMs(r);
+ s+=`<div class="octrow"><button type="button" class="sm" data-oct="-1" aria-label="Lower octave">◀</button><span>Octave ${r.oct}</span><button type="button" class="sm" data-oct="1" aria-label="Higher octave">▶</button></div>`+piano(r.oct);
+ s+=`<div class="lens"><span class="hint">Next note length:</span>${LENS.map(x=>`<button type="button" class="sm${r.nl==x[0]?" on":""}" data-nl="${x[0]}">${x[1]}</button>`).join("")}</div>`;
+ s+=`<div class="nchips" aria-label="Notes in the melody">${r.notes.length?r.notes.map((n,i)=>`<button type="button" class="nchip" data-ni="${i}" title="Click to remove">${n.split("/")[0]} ${LSYM[n.split("/")[1]]}</button>`).join(""):`<span class="hint">Tap the piano keys to add notes.</span>`}</div>`;
+ s+=fld("Tempo (beats per minute)",`<input type="number" data-f="tempo" min="30" max="300" value="${r.tempo}">`);
+ s+=`<div class="lens"><button type="button" class="btn-play sm" data-tact="play">▶ Listen</button><button type="button" class="sm" data-tact="undo">Undo</button><button type="button" class="sm" data-tact="clear">Clear</button></div>`;
+ s+=`<div class="lens"><span class="hint">Examples:</span>${Object.keys(TUNES).map(k=>`<button type="button" class="sm" data-pr="${k}">${k[0].toUpperCase()+k.slice(1)}</button>`).join("")}</div>`;
+ if(!r.notes.length)s+=`<p class="warn">Add at least one note, otherwise a plain beep is used.</p>`;
+ else if(ms>800)s+=`<p class="hint">⚠ This melody lasts ${(ms/1000).toFixed(1)} s. While it plays, the hub can’t read the controller or sensors (motors keep their last speed). Short melodies are safer.</p>`;
+ return s}
+const beepLine=(r,n)=>r.bm=="melody"?(r.notes.length?`hub.speaker.play_notes(TUNE_${n}, tempo=${r.tempo})`:"hub.speaker.beep()"):`hub.speaker.beep(${r.freq}, ${r.dur})`;
 function renderRules(){
  const ms=pn(),sps=sp();
  $("rrows").innerHTML=S.rules.length?S.rules.map((r,i)=>{
@@ -229,6 +280,7 @@ function renderRules(){
    <label class="f chk"><input type="checkbox" data-f="blink"${r.blink?" checked":""}><span>Blink the picture</span></label>`;
   if(r.act=="light")then+=fld("Color",`<select data-f="lc">${opt(L(LCOLS),r.lc)}</select>`)+`<label class="f chk"><input type="checkbox" data-f="blink"${r.blink?" checked":""}><span>Blink</span></label>`;
   if(r.act=="stopmotor")then+=fld("Motor",`<select data-f="tm">${ms.length?opt(ms.map(q=>[q,"Motor "+q]),r.tm):"<option value=''>no motor</option>"}</select>`);
+  if(r.act=="beep")then+=beepUI(r);
   if(r.act=="stopmotor"||r.act=="stopall"){then+=fld("Stop mode",`<select data-f="smode">${opt(SMODE,r.smode)}</select>`);if(r.smode=="latch")then+=fld("Resume when I push",`<select data-f="resume">${opt(AXES,r.resume)}</select>`)}
   then+=`<p class="hint">${hintFor(r)}</p>`;
   return `<div class="rule" data-i="${i}"><div class="rhead"><span>Rule ${i+1}</span><button class="btn-x" data-f="del">✕ Remove</button></div>
@@ -258,6 +310,7 @@ function gen(){
  const nd=c.length;
  rs.forEach((r,i)=>{if(r.act=="display"){c.push(`PIC_${i+1} = [`);for(let y=0;y<5;y++)c.push("    ["+[...r.grid.slice(y*5,y*5+5)].map(v=>v=="1"?100:0).join(", ")+"],");c.push("]")}});
  if(rs.some(r=>r.act=="display"&&r.blink))c.push("BLANK = [[0] * 5 for _ in range(5)]");
+ rs.forEach((r,i)=>{if(r.act=="beep"&&r.bm=="melody"&&r.notes.length)c.push(`TUNE_${i+1} = [${r.notes.map(x=>JSON.stringify(x)).join(", ")}]`)});
  if(c.length>nd)c.push("");
  const ns=c.length;
  ok.forEach((m,i)=>{if(m.act=="toggle")c.push(`running_${i} = False`);if(m.act=="toggle"||m.act=="reset")c.push(`was_down_${i} = False`)});
@@ -293,7 +346,7 @@ function gen(){
  rs.forEach((r,i)=>{const n=i+1;if(!fx(r))return;let a,b="";
   if(r.act=="display"){a=r.blink?`hub.display.animate([PIC_${n}, BLANK], 300)`:`hub.display.icon(PIC_${n})`;b="hub.display.off()"}
   else if(r.act=="light"){a=r.blink?`hub.light.blink(Color.${r.lc}, [300, 300])`:`hub.light.on(Color.${r.lc})`;b="hub.light.off()"}
-  else a=r.act=="beep"?"hub.speaker.beep(800, 150)":"controller.rumble(100, 300)";
+  else a=r.act=="beep"?beepLine(r,n):"controller.rumble(100, 300)";
   c.push("",`    if r${n}_active and not r${n}_was:`,`        ${a}`);
   if(b)c.push(`    elif r${n}_was and not r${n}_active:`,`        ${b}`);
   c.push(`    r${n}_was = r${n}_active`)});
@@ -343,11 +396,24 @@ $("clear").onclick=()=>{S.maps=[];full()};
 
 $("radd").onclick=()=>{S.rules.push(mkRule());full()};
 $("rrows").addEventListener("change",e=>{const el=e.target.closest(".rule");if(!el)return;const r=S.rules[+el.dataset.i],f=e.target.dataset.f;
- if(!f||f=="v")return;
+ if(!f||f=="v"||f=="freq"||f=="dur"||f=="tempo")return;
  if(f=="blink")r.blink=e.target.checked;else r[f]=e.target.value;
  if(f=="src"&&isS(r))sdef(r);full()});
-$("rrows").addEventListener("input",e=>{if(e.target.dataset.f=="v"){S.rules[+e.target.closest(".rule").dataset.i].v=Math.max(0,+e.target.value||0);update()}});
+$("rrows").addEventListener("input",e=>{const f=e.target.dataset.f,el=e.target.closest(".rule");if(!el)return;const r=S.rules[+el.dataset.i];
+ if(f=="v"){r.v=Math.max(0,+e.target.value||0);update()}
+ else if(f=="freq"||f=="dur"||f=="tempo"){const lim={freq:[64,24000],dur:[20,5000],tempo:[30,300]}[f],v=+e.target.value;if(e.target.value===""||isNaN(v))return;r[f]=Math.max(lim[0],Math.min(lim[1],v));
+  if(f=="freq"){const o=e.target.parentElement.querySelector("output");if(o)o.textContent=r.freq+" Hz";tone([[r.freq,120]])}update()}});
 $("rrows").addEventListener("click",e=>{const t=e.target,el=t.closest(".rule");if(!el)return;const r=S.rules[+el.dataset.i];
+ const bt=t.closest("[data-note],[data-ni],[data-tact],[data-nl],[data-oct],[data-pr]");
+ if(bt&&el.contains(bt)){const d=bt.dataset;
+  if(d.note){r.notes.length<64&&r.notes.push(d.note+"/"+r.nl);tone([[noteHz(d.note),260]])}
+  else if(d.ni!==undefined)r.notes.splice(+d.ni,1);
+  else if(d.nl)r.nl=d.nl;
+  else if(d.oct)r.oct=Math.max(2,Math.min(7,r.oct+ +d.oct));
+  else if(d.pr){r.notes=[...TUNES[d.pr].n];r.tempo=TUNES[d.pr].t}
+  else if(d.tact=="undo")r.notes.pop();else if(d.tact=="clear")r.notes=[];
+  else if(d.tact=="play"){tone(seqOf(r));return}
+  full();return}
  if(t.dataset.f=="del"){S.rules.splice(+el.dataset.i,1);full()}
  else if(t.closest("svg.mini")){const k=t.dataset.k;if(k){r.src=k=="lstick"?"LJ":k=="rstick"?"RJ":k;full()}}
  else if(t.dataset.k!==undefined){const k=+t.dataset.k,g=[...r.grid];g[k]=g[k]=="1"?"0":"1";r.grid=g.join("");t.classList.toggle("on");update()}
@@ -380,6 +446,9 @@ function fromMarker(t){
   if(!(RBTN.some(b=>b[0]==x.src)||(x.src[0]=="@"&&PORTS.includes(x.src.slice(1)))))return;
   const r=mkRule();["src","mode","c","col","act","tm","lc","smode","resume"].forEach(f=>{if(typeof x[f]=="string")r[f]=x[f]});
   if(!isNaN(+x.v))r.v=+x.v;r.blink=!!x.blink;if(typeof x.grid=="string"&&/^[01]{25}$/.test(x.grid))r.grid=x.grid;
+  const nf=(v,lo,hi,d)=>{v=+v;return isNaN(v)?d:Math.max(lo,Math.min(hi,v))};
+  if(["simple","melody"].includes(x.bm))r.bm=x.bm;r.freq=nf(x.freq,64,24000,800);r.dur=nf(x.dur,20,5000,150);r.tempo=nf(x.tempo,30,300,120);r.oct=nf(x.oct,2,7,4);
+  if(["8","4","2","1"].includes(x.nl))r.nl=x.nl;if(Array.isArray(x.notes))r.notes=x.notes.filter(n=>typeof n=="string"&&NOTE_RE.test(n)).slice(0,64);
   if(!RACT.some(a=>a[0]==r.act))r.act="display";if(!SMODE.some(a=>a[0]==r.smode))r.smode="while";if(!okKey(r.resume))r.resume="ly";
   S.rules.push(r)});
  S.rules.forEach(fixR);
@@ -424,7 +493,10 @@ function fromCode(t){
    else if(q=l.match(/hub\.display\.animate\(\[PIC_(\d+),\s*BLANK\]/)){a="display";r.blink=true;r._p=q[1]}
    else if(q=l.match(/hub\.light\.on\(Color\.(\w+)\)/)){a="light";r.blink=false;r.lc=LCOLS.includes(q[1])?q[1]:"GREEN"}
    else if(q=l.match(/hub\.light\.blink\(Color\.(\w+)/)){a="light";r.blink=true;r.lc=LCOLS.includes(q[1])?q[1]:"GREEN"}
-   else if(/hub\.speaker\.beep/.test(l))a="beep";else if(/controller\.rumble/.test(l))a="rumble"}
+   else if(q=l.match(/hub\.speaker\.play_notes\(TUNE_(\d+),\s*tempo\s*=\s*(\d+)\)/)){a="beep";r.bm="melody";r.tempo=Math.max(30,Math.min(300,+q[2]));
+    const tb=t.match(new RegExp(`TUNE_${q[1]} = \\[([^\\]]*)\\]`));r.notes=tb?[...tb[1].matchAll(/"([^"]+)"/g)].map(x=>x[1]).filter(n=>NOTE_RE.test(n)):[]}
+   else if(q=l.match(/hub\.speaker\.beep\((?:(\d+)\s*,\s*(\d+))?\)/)){a="beep";r.bm="simple";if(q[1]){r.freq=Math.max(64,Math.min(24000,+q[1]));r.dur=Math.max(20,Math.min(5000,+q[2]))}else{r.freq=500;r.dur=100}}
+   else if(/controller\.rumble/.test(l))a="rumble"}
   else{
    const L=[...t.matchAll(new RegExp(`if r${id}_stopped:\\s*\\n\\s*speed_(\\w+)\\s*=\\s*0`,"g"))].map(x=>U(x[1])),
     F=[...t.matchAll(new RegExp(`if r${id}_active:\\s*\\n\\s*speed_(\\w+)\\s*=\\s*min\\(`,"g"))].map(x=>U(x[1])),
