@@ -58,6 +58,9 @@ svg{width:100%;max-width:440px;height:auto;justify-self:center}
 .mx{display:grid;grid-template-columns:repeat(5,38px);gap:5px;background:#1c1d23;padding:8px;border-radius:10px;width:max-content;max-width:100%}
 .pxc{width:38px;height:38px;border-radius:8px;border:0;background:var(--off);padding:0}
 .pxc.on{background:var(--yel);box-shadow:0 0 8px rgba(255,213,0,.7)}
+svg.mini{max-width:230px;justify-self:start}
+.sensbadge{display:flex;align-items:center;gap:10px;background:#26272d;color:#fff;border-radius:10px;padding:8px 12px;font-weight:700;justify-self:start}
+.sensbadge b{color:var(--yel);font-size:1.3rem}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{padding:3px 10px;border-radius:99px;font-size:1rem}
 svg .p{fill:var(--line);stroke:var(--mute);stroke-width:2;transition:.15s}
@@ -194,6 +197,7 @@ function renderRules(){
   const sens=isS(r),p=sens?r.src.slice(1):"",t=sens?st(p):"";
   const src=`<optgroup label="Controller">${opt(BTN,r.src)}</optgroup>`+(sps.length?`<optgroup label="Hub sensors">${opt(sps.map(q=>["@"+q,SN[st(q)]+" · port "+q]),r.src)}</optgroup>`:`<optgroup label="Hub sensors"><option disabled>First set a port to a sensor in step 1</option></optgroup>`);
   let when=fld("Trigger",`<select data-f="src">${src}</select>`);
+  when+=sens?`<div class="sensbadge"><b>${p}</b><span>${SN[t]} on port ${p}</span></div>`:`<svg class="mini" viewBox="0 0 400 240" role="img" aria-label="Xbox controller: ${BTN.find(b=>b[0]==r.src)[1]} highlighted">${padInner(padSet(r.src))}</svg>`;
   if(!sens)when+=fld("How",`<select data-f="mode">${opt([["hold","While held down"],["toggle","Press to switch on / off"]],r.mode)}</select>`);
   else{const conds=t=="dist"?[["near","Is closer than"]]:t=="force"?[["press","Is pressed with at least"]]:[["color","Sees the color"],["dark","Reflection is below"],["bright","Reflection is above"]];
    when+=fld("Condition",`<select data-f="c">${opt(conds,r.c)}</select>`);
@@ -271,9 +275,10 @@ function gen(){
 
 /* controller drawing */
 const SV={lstick:["lx","ly","LJ"],rstick:["rx","ry","RJ"]};
-function drawPad(){
- const e=(t,a,k)=>`<${t} class="p" data-k="${k}" ${a}/>`;
- $("pad").innerHTML=`<path class="body" d="M72 62Q60 56 100 52H300Q340 56 328 62L372 190Q378 218 350 218Q322 218 306 188L292 162H108L94 188Q78 218 50 218Q22 218 28 190Z"/>
+const padSet=k=>{const u=new Set([k]);for(const s in SV)if(SV[s].includes(k))u.add(s);return u};
+function padInner(u){
+ const e=(t,a,k)=>`<${t} class="p${u&&u.has(k)?" on":""}" data-k="${k}" ${a}/>`;
+ return `<path class="body" d="M72 62Q60 56 100 52H300Q340 56 328 62L372 190Q378 218 350 218Q322 218 306 188L292 162H108L94 188Q78 218 50 218Q22 218 28 190Z"/>
  ${e("rect",'x="86" y="20" width="50" height="14" rx="6"',"lt")}<text x="100" y="31">LT</text>
  ${e("rect",'x="264" y="20" width="50" height="14" rx="6"',"rt")}<text x="278" y="31">RT</text>
  ${e("rect",'x="76" y="38" width="66" height="12" rx="5"',"LB")}<text x="100" y="48">LB</text>
@@ -284,8 +289,8 @@ function drawPad(){
  ${e("rect",'x="130" y="144" width="16" height="16" rx="3"',"LEFT")}${e("rect",'x="166" y="144" width="16" height="16" rx="3"',"RIGHT")}
  ${e("circle",'cx="290" cy="82" r="12"',"Y")}<text x="286" y="86">Y</text>${e("circle",'cx="312" cy="102" r="12"',"B")}<text x="308" y="106">B</text>
  ${e("circle",'cx="290" cy="122" r="12"',"A")}<text x="286" y="126">A</text>${e("circle",'cx="268" cy="102" r="12"',"X")}<text x="264" y="106">X</text>
- ${e("circle",'cx="172" cy="98" r="7"',"VIEW")}${e("circle",'cx="228" cy="98" r="7"',"MENU")}`;
- refreshPad()}
+ ${e("circle",'cx="172" cy="98" r="7"',"VIEW")}${e("circle",'cx="228" cy="98" r="7"',"MENU")}`}
+function drawPad(){$("pad").innerHTML=padInner();refreshPad()}
 function refreshPad(){
  const u=new Set();
  const add=k=>{u.add(k);for(const s in SV)if(SV[s].includes(k))u.add(s)};
